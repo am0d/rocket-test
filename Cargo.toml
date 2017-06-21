@@ -1,0 +1,19 @@
+[package]
+authors = ["am0d"]
+name = "rocket-test"
+version = "0.1.0"
+
+[dependencies]
+diesel = "0.13.0"
+diesel_codegen = "0.13.0"
+dotenv = "0.10.0"
+rocket = "0.2.8"
+rocket_codegen = "0.2.8"
+serde = "0.9"
+serde_derive = "0.9"
+serde_json = "0.9"
+
+[dependencies.rocket_contrib]
+version = "0.2.8"
+default-features = false
+features = ["handlebars_templates"]
