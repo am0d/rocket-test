@@ -1,16 +1,23 @@
-#![feature(plugin,custom_derive)]
+#![feature(plugin, custom_derive)]
 #![plugin(rocket_codegen)]
+
+#[macro_use]
+extern crate diesel_codegen;
+
+pub mod schema;
 
 extern crate rocket_contrib;
 extern crate rocket;
+#[macro_use]
+extern crate diesel;
+extern crate dotenv;
 extern crate serde;
 extern crate serde_json;
 #[macro_use]
 extern crate serde_derive;
 
-use rocket::Request;
-use rocket::response::Redirect;
 use rocket_contrib::Template;
+
 
 #[derive(Serialize)]
 pub struct TemplateContext {
