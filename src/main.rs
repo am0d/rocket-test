@@ -5,6 +5,7 @@
 extern crate diesel_codegen;
 
 pub mod schema;
+pub mod db;
 
 extern crate rocket_contrib;
 extern crate rocket;
@@ -15,9 +16,10 @@ extern crate serde;
 extern crate serde_json;
 #[macro_use]
 extern crate serde_derive;
+extern crate r2d2;
+extern crate r2d2_diesel;
 
 use rocket_contrib::Template;
-
 
 #[derive(Serialize)]
 pub struct TemplateContext {
