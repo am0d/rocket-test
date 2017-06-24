@@ -9,7 +9,10 @@
 <body>
     <div class="container">
         <h4>Create a new blog post!</h4>
-        <form class="form" method="POST" action="/post/0">
+        {{#if flash}}
+        <div class="text-danger">{{flash}}</div>
+        {{/if}}
+        <form class="form" method="POST" action="/">
             <div class="form-group">
                 <label for="title">
                     Title
