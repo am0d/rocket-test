@@ -49,6 +49,8 @@ fn new_post(post_form: Form<models::post::NewPost>, conn: db::PgSqlConn) -> Flas
     let post = post_form.into_inner();
     if post.title.is_empty() {
         Flash::error(Redirect::to("/"), "Title cannot be empty")
+    } else if post.insert(&conn) {
+        Flash::success(Redirect::to("/"), "Post saved.")
     } else {
         Flash::error(Redirect::to("/"), "Saving is not yet implemented, sorry")
     }
