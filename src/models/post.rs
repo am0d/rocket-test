@@ -1,9 +1,8 @@
-use db::{self, PgSqlConn};
 use schema::post;
 use diesel;
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
-use rocket::request::{self, FromForm, Request};
+// use rocket::request::{self, FromForm, Request};
 
 #[derive(Insertable, FromForm, Debug, Clone)]
 #[table_name = "post"]

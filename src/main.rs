@@ -31,7 +31,12 @@ pub struct TemplateContext {
 }
 
 #[get("/")]
-fn index(message: Option<FlashMessage>) -> Template {
+fn index() -> Redirect {
+    Redirect::to("/posts/new")
+}
+
+#[get("/posts/new")]
+fn new_post_get(message: Option<FlashMessage>) -> Template {
     let flash = if let Some(message) = message {
         Some(message.msg().to_string())
     } else {
@@ -44,21 +49,21 @@ fn index(message: Option<FlashMessage>) -> Template {
     Template::render("index", &context)
 }
 
-#[post("/", data = "<post_form>")]
-fn new_post(post_form: Form<models::post::NewPost>, conn: db::PgSqlConn) -> Flash<Redirect> {
+#[post("/posts", data = "<post_form>")]
+fn new_post_post(post_form: Form<models::post::NewPost>, conn: db::PgSqlConn) -> Flash<Redirect> {
     let post = post_form.into_inner();
     if post.title.is_empty() {
-        Flash::error(Redirect::to("/"), "Title cannot be empty")
+        Flash::error(Redirect::to("/posts"), "Title cannot be empty")
     } else if post.insert(&conn) {
-        Flash::success(Redirect::to("/"), "Post saved.")
+        Flash::success(Redirect::to("/posts"), "Post saved.")
     } else {
-        Flash::error(Redirect::to("/"), "Saving is not yet implemented, sorry")
+        Flash::error(Redirect::to("/posts"), "Saving is not yet implemented, sorry")
     }
 }
 
 fn main() {
     rocket::ignite()
         .manage(db::establish_connection())
-        .mount("/", routes![index, new_post])
+        .mount("/", routes![index, new_post_get, new_post_post])
         .launch();
 }
