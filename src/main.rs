@@ -30,9 +30,24 @@ pub struct TemplateContext {
     flash: Option<String>,
 }
 
+#[derive(Serialize)]
+pub struct IndexTemplateContext {
+    posts: Vec<models::post::Post>,
+    flash: Option<String>,
+}
+
 #[get("/")]
-fn index() -> Redirect {
-    Redirect::to("/posts/new")
+fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> Template {
+    let flash = if let Some(message) = message {
+        Some(message.msg().to_string())
+    } else {
+        None
+    };
+    let context = IndexTemplateContext {
+        posts: models::post::Post::list(&conn),
+        flash: flash,
+    };
+    Template::render("index", &context)
 }
 
 #[get("/posts/new")]
@@ -46,18 +61,18 @@ fn new_post_get(message: Option<FlashMessage>) -> Template {
         title: "Hello, World".to_string(),
         flash: flash,
     };
-    Template::render("index", &context)
+    Template::render("edit_post", &context)
 }
 
 #[post("/posts", data = "<post_form>")]
 fn new_post_post(post_form: Form<models::post::NewPost>, conn: db::PgSqlConn) -> Flash<Redirect> {
     let post = post_form.into_inner();
     if post.title.is_empty() {
-        Flash::error(Redirect::to("/posts"), "Title cannot be empty")
+        Flash::error(Redirect::to("/posts/new"), "Title cannot be empty")
     } else if post.insert(&conn) {
-        Flash::success(Redirect::to("/posts"), "Post saved.")
+        Flash::success(Redirect::to("/"), "Post saved.")
     } else {
-        Flash::error(Redirect::to("/posts"), "Saving is not yet implemented, sorry")
+        Flash::error(Redirect::to("/posts/new"), "Saving is not yet implemented, sorry")
     }
 }
 

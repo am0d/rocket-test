@@ -17,3 +17,16 @@ impl NewPost {
         diesel::insert(self).into(post::table).execute(conn).is_ok()
     }
 }
+#[derive(Queryable, Serialize, Debug, Clone)]
+pub struct Post {
+    pub id: i32,
+    pub title: String,
+    pub body: String,
+    pub published: bool,
+}
+
+impl Post {
+    pub fn list(conn: &PgConnection) -> Vec<Post> {
+        post::table.order(post::id).load::<Post>(conn).unwrap()
+    }
+}
