@@ -41,3 +41,9 @@ pub fn new_post_post(
         )
     }
 }
+
+#[get("/<id>")]
+pub fn view(id: i32, conn: db::PgSqlConn) -> Template {
+    let post = models::post::Post::get(id, &conn);
+    Template::render("post/view", &post)
+}

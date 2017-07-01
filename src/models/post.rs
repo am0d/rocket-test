@@ -26,6 +26,10 @@ pub struct Post {
 }
 
 impl Post {
+    pub fn get(id: i32, conn: &PgConnection) -> Post {
+        post::table.filter(post::id.eq(id)).first::<Post>(conn).unwrap()
+    }
+
     pub fn list(conn: &PgConnection) -> Vec<Post> {
         post::table.order(post::id).load::<Post>(conn).unwrap()
     }
