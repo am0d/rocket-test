@@ -8,7 +8,27 @@ use db;
 use models;
 
 pub fn all_routes() -> Vec<rocket::Route> {
-    routes![new_post_get, new_post_post, view]
+    routes![index, new_post_get, new_post_post, view]
+}
+
+#[derive(Serialize)]
+pub struct IndexTemplateContext {
+    posts: Vec<models::post::Post>,
+    flash: Option<String>,
+}
+
+#[get("/")]
+fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> Template {
+    let flash = if let Some(message) = message {
+        Some(message.msg().to_string())
+    } else {
+        None
+    };
+    let context = IndexTemplateContext {
+        posts: models::post::Post::list(&conn),
+        flash: flash,
+    };
+    Template::render("post/index", &context)
 }
 
 #[derive(Serialize)]
