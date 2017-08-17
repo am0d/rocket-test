@@ -1,8 +1,15 @@
 use rocket_contrib::Template;
+use rocket;
 use rocket::request::{Form, FlashMessage};
 use rocket::response::{Flash, Redirect};
+use std::vec::Vec;
+use markdown;
 use db;
 use models;
+
+pub fn all_routes() -> Vec<rocket::Route> {
+    routes![new_post_get, new_post_post, view]
+}
 
 #[derive(Serialize)]
 pub struct TemplateContext {
@@ -45,5 +52,6 @@ pub fn new_post_post(
 #[get("/<id>")]
 pub fn view(id: i32, conn: db::PgSqlConn) -> Template {
     let post = models::post::Post::get(id, &conn);
+    markdown::to_html(&post.body);
     Template::render("post/view", &post)
 }
