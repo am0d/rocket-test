@@ -7,6 +7,7 @@ use markdown;
 use db;
 use models;
 
+/// Returns all the routes defined on this controller
 pub fn all_routes() -> Vec<rocket::Route> {
     routes![index, new_post_get, new_post_post, view]
 }
@@ -17,8 +18,9 @@ pub struct IndexTemplateContext {
     flash: Option<String>,
 }
 
+/// Lists all the posts
 #[get("/")]
-fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> Template {
+pub fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> Template {
     let flash = if let Some(message) = message {
         Some(message.msg().to_string())
     } else {
@@ -33,33 +35,39 @@ fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> Template {
 
 #[derive(Serialize)]
 pub struct TemplateContext {
-    title: String,
+    post: models::post::Post,
     flash: Option<String>,
 }
 
-#[get("/new")]
-pub fn new_post_get(message: Option<FlashMessage>) -> Template {
+#[get("/<id>/edit")]
+pub fn new_post_get(id: i32, conn: db::PgSqlConn, message: Option<FlashMessage>) -> Template {
     let flash = if let Some(message) = message {
         Some(message.msg().to_string())
     } else {
         None
     };
+    let post = if id == 0 {
+        models::post::Post::new()
+    } else {
+        models::post::Post::get(id, &conn)
+    };
     let context = TemplateContext {
-        title: "Hello, World".to_string(),
+        post: models::post::Post::from(post),
         flash: flash,
     };
     Template::render("post/edit", &context)
 }
 
-#[post("/", data = "<post_form>")]
+#[post("/<id>/edit", data = "<post_form>")]
 pub fn new_post_post(
-    post_form: Form<models::post::NewPost>,
+    id: u32,
+    post_form: Form<models::post::Post>,
     conn: db::PgSqlConn,
 ) -> Flash<Redirect> {
     let post = post_form.into_inner();
     if post.title.is_empty() {
-        Flash::error(Redirect::to("/posts/new"), "Title cannot be empty")
-    } else if post.insert(&conn) {
+        Flash::error(Redirect::to(&format!("/posts/{0}/edit", id)), "Title cannot be empty")
+    } else if post.save(&conn) {
         Flash::success(Redirect::to("/"), "Post saved.")
     } else {
         Flash::error(
