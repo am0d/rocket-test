@@ -27,6 +27,16 @@
                 </label>
                 <textarea name="body" id="body" placeholder="Contents go here ..." class="form-control">{{post.body}}</textarea>
             </div>
+            <div class="form-group">
+                <label for="categories">
+                    Categories
+                </label>
+                <select multiple name="categories" id="categories" class="form-control">
+                    {{#each categories}}
+                    <option value="{{id}}">{{name}}</option>
+                    {{/each}}
+                </select>
+            </div>
             <button type="submit" class="btn btn-primary">Save</button>
         </form>
     </div>

@@ -1,7 +1,7 @@
 use rocket_contrib::Template;
 use rocket;
 use rocket::request::{Form, FlashMessage};
-use rocket::response::{Flash, Redirect};
+use rocket::response::{Flash, Redirect, Response};
 use std::vec::Vec;
 use markdown;
 use db;
@@ -36,6 +36,7 @@ pub fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> Template {
 #[derive(Serialize)]
 pub struct TemplateContext {
     post: models::post::Post,
+    categories: Option<Vec<models::category::Category>>,
     flash: Option<String>,
 }
 
@@ -53,27 +54,33 @@ pub fn new_post_get(id: i32, conn: db::PgSqlConn, message: Option<FlashMessage>)
     };
     let context = TemplateContext {
         post: models::post::Post::from(post),
+        categories: Some(models::category::Category::list(&conn)),
         flash: flash,
     };
     Template::render("post/edit", &context)
 }
 
-#[post("/<id>/edit", data = "<post_form>")]
+#[post("/<_id>/edit", data = "<post_form>")]
 pub fn new_post_post(
-    id: u32,
+    _id: u32,
     post_form: Form<models::post::Post>,
     conn: db::PgSqlConn,
-) -> Flash<Redirect> {
+) -> Result<Template, Flash<Redirect>> {
     let post = post_form.into_inner();
     if post.title.is_empty() {
-        Flash::error(Redirect::to(&format!("/posts/{0}/edit", id)), "Title cannot be empty")
+        let context = TemplateContext {
+            post: post,
+            categories: Some(models::category::Category::list(&conn)),
+            flash: Some("Title cannot be empty".to_string()),
+        };
+        Ok(Template::render("post/edit", &context))
     } else if post.save(&conn) {
-        Flash::success(Redirect::to("/posts"), "Post saved.")
+        Err(Flash::success(Redirect::to("/posts"), "Post saved."))
     } else {
-        Flash::error(
+        Err(Flash::error(
             Redirect::to("/posts/new"),
             "Saving is not yet implemented, sorry",
-        )
+        ))
     }
 }
 
