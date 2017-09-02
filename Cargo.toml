@@ -5,6 +5,7 @@ version = "0.1.0"
 
 [dependencies]
 dotenv = "0.10.1"
+log = "0.3.8"
 markdown = "0.2.0"
 r2d2 = "0.7.3"
 r2d2-diesel = "0.15.0"
