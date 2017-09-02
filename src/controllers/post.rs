@@ -68,7 +68,7 @@ pub fn new_post_post(
     if post.title.is_empty() {
         Flash::error(Redirect::to(&format!("/posts/{0}/edit", id)), "Title cannot be empty")
     } else if post.save(&conn) {
-        Flash::success(Redirect::to("/"), "Post saved.")
+        Flash::success(Redirect::to("/posts"), "Post saved.")
     } else {
         Flash::error(
             Redirect::to("/posts/new"),

@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>New category</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <div class="container">
+        <h4>Create a new category!</h4>
+        {{#if flash}}
+        <div class="text-danger">{{flash}}</div>
+        {{/if}}
+        <form class="form" method="POST" action="/categories/{{category.id}}/edit">
+            <input type="hidden" name="id" id="id" value="{{category.id}}" />
+            <div class="form-group">
+                <label for="name">
+                    Name
+                </label>
+                <input name="name" id="name" value="{{category.name}}" placeholder="Name" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+    </div>
+</body>
+
+</html>

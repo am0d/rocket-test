@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Index</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <div class="container">
+        <a href="/categories/0/edit">New Category</a>
+        <h4>Categories:</h4>
+        {{#if flash}}
+        <div class="text-danger">{{flash}}</div>
+        {{/if}}
+        <ul>
+            {{#each categories}}
+            <li><a href="/categories/{{id}}/edit">{{name}}</a></li>
+            {{/each}}
+        </ul>
+    </div>
+</body>
+
+</html>
