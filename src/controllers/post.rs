@@ -6,16 +6,11 @@ use std::vec::Vec;
 use markdown;
 use db;
 use models;
+use super::context::{IndexTemplateContext, TemplateContext};
 
 /// Returns all the routes defined on this controller
 pub fn all_routes() -> Vec<rocket::Route> {
-    routes![index, new_post_get, new_post_post, view]
-}
-
-#[derive(Serialize)]
-pub struct IndexTemplateContext {
-    posts: Vec<models::post::Post>,
-    flash: Option<String>,
+    routes![index, edit_get, edit_post, view]
 }
 
 /// Lists all the posts
@@ -27,21 +22,15 @@ pub fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> Template {
         None
     };
     let context = IndexTemplateContext {
-        posts: models::post::Post::list(&conn),
+        model: models::post::Post::list(&conn),
         flash: flash,
+        extra_data: ()
     };
     Template::render("post/index", &context)
 }
 
-#[derive(Serialize)]
-pub struct TemplateContext {
-    post: models::post::Post,
-    categories: Option<Vec<models::category::Category>>,
-    flash: Option<String>,
-}
-
 #[get("/<id>/edit")]
-pub fn new_post_get(id: i32, conn: db::PgSqlConn, message: Option<FlashMessage>) -> Template {
+pub fn edit_get(id: i32, conn: db::PgSqlConn, message: Option<FlashMessage>) -> Template {
     let flash = if let Some(message) = message {
         Some(message.msg().to_string())
     } else {
@@ -53,15 +42,15 @@ pub fn new_post_get(id: i32, conn: db::PgSqlConn, message: Option<FlashMessage>)
         models::post::Post::get(id, &conn)
     };
     let context = TemplateContext {
-        post: models::post::Post::from(post),
-        categories: Some(models::category::Category::list(&conn)),
+        model: post,
         flash: flash,
+        extra_data: (models::category::Category::list(&conn),)
     };
     Template::render("post/edit", &context)
 }
 
 #[post("/<_id>/edit", data = "<post_form>")]
-pub fn new_post_post(
+pub fn edit_post(
     _id: u32,
     post_form: LenientForm<models::post::Post>,
     conn: db::PgSqlConn,
@@ -69,8 +58,8 @@ pub fn new_post_post(
     let post = post_form.into_inner();
     if post.title.is_empty() {
         let context = TemplateContext {
-            post: post,
-            categories: Some(models::category::Category::list(&conn)),
+            model: post,
+            extra_data: (models::category::Category::list(&conn),),
             flash: Some("Title cannot be empty".to_string()),
         };
         Ok(Template::render("post/edit", &context))

@@ -1,5 +1,6 @@
 #![feature(plugin, custom_derive, custom_attribute)]
 #![plugin(rocket_codegen)]
+#![cfg_attr(feature = "clippy", allow(suspicious_else_formatting,needless_pass_by_value))]
 
 #[macro_use]
 extern crate diesel_codegen;
@@ -16,6 +17,7 @@ extern crate diesel;
 extern crate dotenv;
 #[macro_use]
 extern crate serde_derive;
+extern crate serde;
 extern crate r2d2;
 extern crate r2d2_diesel;
 extern crate markdown;

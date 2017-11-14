@@ -12,27 +12,27 @@
         {{#if flash}}
         <div class="text-danger">{{flash}}</div>
         {{/if}}
-        <form class="form" method="POST" action="/posts/{{post.id}}/edit">
-            <input type="hidden" name="id" id="id" value="{{post.id}}" />
+        <form class="form" method="POST" action="/posts/{{model.id}}/edit">
+            <input type="hidden" name="id" id="id" value="{{model.id}}" />
             <input type="hidden" name="published" id="published" value="false" />
             <div class="form-group">
                 <label for="title">
                     Title
                 </label>
-                <input name="title" id="title" value="{{post.title}}" placeholder="Title" class="form-control" />
+                <input name="title" id="title" value="{{model.title}}" placeholder="Title" class="form-control" />
             </div>
             <div class="form-group">
                 <label for="body">
                     Body
                 </label>
-                <textarea name="body" id="body" placeholder="Contents go here ..." class="form-control">{{post.body}}</textarea>
+                <textarea name="body" id="body" placeholder="Contents go here ..." class="form-control">{{model.body}}</textarea>
             </div>
             <div class="form-group">
                 <label for="categories">
                     Categories
                 </label>
-                <select multiple name="categories" id="categories" class="form-control">
-                    {{#each categories}}
+                <select name="category" id="category" class="form-control">
+                    {{#each extra_data.0}}
                     <option value="{{id}}">{{name}}</option>
                     {{/each}}
                 </select>

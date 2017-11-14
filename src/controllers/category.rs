@@ -5,16 +5,11 @@ use rocket::response::{Flash, Redirect};
 use std::vec::Vec;
 use db;
 use models;
+use super::context::{IndexTemplateContext, TemplateContext};
 
 /// Returns all the routes defined on this controller
 pub fn all_routes() -> Vec<rocket::Route> {
-    routes![index, new_category_get, new_category_post]
-}
-
-#[derive(Serialize)]
-pub struct IndexTemplateContext {
-    categories: Vec<models::category::Category>,
-    flash: Option<String>,
+    routes![index, edit_get, edit_post]
 }
 
 /// Lists all the categories
@@ -26,20 +21,15 @@ pub fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> Template {
         None
     };
     let context = IndexTemplateContext {
-        categories: models::category::Category::list(&conn),
+        model: models::category::Category::list(&conn),
         flash: flash,
+        extra_data: ()
     };
     Template::render("category/index", &context)
 }
 
-#[derive(Serialize)]
-pub struct TemplateContext {
-    category: models::category::Category,
-    flash: Option<String>,
-}
-
 #[get("/<id>/edit")]
-pub fn new_category_get(id: i32, conn: db::PgSqlConn, message: Option<FlashMessage>) -> Template {
+pub fn edit_get(id: i32, conn: db::PgSqlConn, message: Option<FlashMessage>) -> Template {
     let flash = if let Some(message) = message {
         Some(message.msg().to_string())
     } else {
@@ -51,14 +41,15 @@ pub fn new_category_get(id: i32, conn: db::PgSqlConn, message: Option<FlashMessa
         models::category::Category::get(id, &conn)
     };
     let context = TemplateContext {
-        category: models::category::Category::from(category),
+        model: category,
         flash: flash,
+        extra_data: ()
     };
     Template::render("category/edit", &context)
 }
 
 #[post("/<id>/edit", data = "<category_form>")]
-pub fn new_category_post(
+pub fn edit_post(
     id: u32,
     category_form: Form<models::category::Category>,
     conn: db::PgSqlConn,

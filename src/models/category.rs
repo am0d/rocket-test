@@ -9,7 +9,7 @@ struct NewCategory<'a> {
     name: &'a str,
 }
 
-#[derive(Identifiable, Insertable, FromForm, Debug, Clone, AsChangeset, Queryable, Serialize)]
+#[derive(Identifiable, Insertable, FromForm, Debug, Clone, AsChangeset, Queryable, Serialize, Default)]
 #[table_name = "category"]
 pub struct Category {
     pub id: i32,

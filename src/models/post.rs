@@ -2,7 +2,6 @@ use schema::post;
 use diesel;
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
-// use rocket::request::{self, FromForm, Request};
 
 #[derive(Insertable, Debug, Clone, Serialize)]
 #[table_name = "post"]
@@ -12,7 +11,7 @@ struct NewPost<'a> {
     published: bool,
 }
 
-#[derive(Identifiable, Insertable, FromForm, Debug, Clone, AsChangeset, Queryable, Serialize)]
+#[derive(Identifiable, Insertable, FromForm, Debug, Clone, AsChangeset, Queryable, Serialize, Default)]
 #[table_name = "post"]
 pub struct Post {
     pub id: i32,
@@ -57,12 +56,11 @@ impl Post {
     fn update(&self, conn: &PgConnection) -> bool {
         use diesel::SaveChangesDsl;
         self.save_changes::<Post>(conn).is_ok()
-        //diesel::update(post::table).set(self).execute(conn).is_ok()
     }
 }
 
 impl<'a> NewPost<'a> {
-    fn from(post: &'a Post) -> NewPost<'a>{
+    fn from(post: &'a Post) -> NewPost<'a> {
         NewPost {
             title: &post.title,
             body: &post.body,
