@@ -3,10 +3,10 @@ use diesel;
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
 
-#[derive(Insertable,Debug,Clone,Serialize)]
-#[table_name="category"]
+#[derive(Insertable, Debug, Clone, Serialize)]
+#[table_name = "category"]
 struct NewCategory<'a> {
-    name: &'a str
+    name: &'a str,
 }
 
 #[derive(Identifiable, Insertable, FromForm, Debug, Clone, AsChangeset, Queryable, Serialize)]
@@ -16,11 +16,17 @@ pub struct Category {
     pub name: String,
 }
 
+#[derive(FromForm, Debug, Clone)]
+pub struct CategoryForm {
+    pub id: i32,
+    pub name: String,
+}
+
 impl Category {
     pub fn new() -> Category {
         Category {
             id: 0,
-            name: "".to_string()
+            name: "".to_string(),
         }
     }
 
@@ -32,7 +38,10 @@ impl Category {
     }
 
     pub fn list(conn: &PgConnection) -> Vec<Category> {
-        category::table.order(category::id).load::<Category>(conn).unwrap()
+        category::table
+            .order(category::id)
+            .load::<Category>(conn)
+            .unwrap()
     }
 
     pub fn save(&self, conn: &PgConnection) -> bool {
@@ -55,12 +64,13 @@ impl Category {
 }
 
 impl<'a> NewCategory<'a> {
-    fn from(category: &'a Category) -> NewCategory<'a>{
-        NewCategory {
-            name: &category.name,
-        }
+    fn from(category: &'a Category) -> NewCategory<'a> {
+        NewCategory { name: &category.name }
     }
     fn insert(&self, conn: &PgConnection) -> bool {
-        diesel::insert(self).into(category::table).execute(conn).is_ok()
+        diesel::insert(self)
+            .into(category::table)
+            .execute(conn)
+            .is_ok()
     }
 }

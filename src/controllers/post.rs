@@ -1,7 +1,7 @@
 use rocket_contrib::Template;
 use rocket;
-use rocket::request::{Form, FlashMessage};
-use rocket::response::{Flash, Redirect, Response};
+use rocket::request::{LenientForm, FlashMessage};
+use rocket::response::{Flash, Redirect};
 use std::vec::Vec;
 use markdown;
 use db;
@@ -63,7 +63,7 @@ pub fn new_post_get(id: i32, conn: db::PgSqlConn, message: Option<FlashMessage>)
 #[post("/<_id>/edit", data = "<post_form>")]
 pub fn new_post_post(
     _id: u32,
-    post_form: Form<models::post::Post>,
+    post_form: LenientForm<models::post::Post>,
     conn: db::PgSqlConn,
 ) -> Result<Template, Flash<Redirect>> {
     let post = post_form.into_inner();
