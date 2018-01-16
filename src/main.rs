@@ -9,6 +9,7 @@ pub mod schema;
 pub mod db;
 pub mod models;
 pub mod controllers;
+pub mod util;
 
 extern crate rocket_contrib;
 extern crate rocket;
@@ -21,6 +22,9 @@ extern crate serde;
 extern crate r2d2;
 extern crate r2d2_diesel;
 extern crate markdown;
+extern crate chrono;
+extern crate failure;
+#[macro_use] extern crate failure_derive;
 
 use rocket_contrib::Template;
 use rocket::response::Redirect;
