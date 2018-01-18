@@ -1,6 +1,6 @@
 use rocket_contrib::Template;
 use rocket;
-use rocket::request::{Form, FlashMessage};
+use rocket::request::{FlashMessage, Form};
 use rocket::response::{Flash, Redirect};
 use std::vec::Vec;
 use db;
@@ -45,10 +45,9 @@ pub fn edit_get(id: i32, conn: db::PgSqlConn, message: Option<FlashMessage>) -> 
     } else {
         None
     };
-    let period = if id == 0 {
-        Ok(models::period::Period::new())
-    } else {
-        models::period::Period::get(id, &conn)
+    let period = match id {
+        0 => Ok(models::period::Period::new()),
+        _ => models::period::Period::get(id, &conn),
     };
     match period {
         Ok(period) => {

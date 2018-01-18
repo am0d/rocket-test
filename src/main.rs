@@ -5,11 +5,12 @@
 #[macro_use]
 extern crate diesel_codegen;
 
+#[macro_use]
+pub mod util;
 pub mod schema;
 pub mod db;
 pub mod models;
 pub mod controllers;
-pub mod util;
 
 extern crate rocket_contrib;
 extern crate rocket;

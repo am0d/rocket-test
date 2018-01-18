@@ -1,0 +1,9 @@
+{
+    "rust.rustup": {
+        "toolchain": "nightly-2018-01-14-x86_64-unknown-linux-gnu",
+        "nightlyToolchain": "nightly-2018-01-14-x86_64-unknown-linux-gnu"
+    },
+    "rust-client.channel": "nightly-2018-01-14",
+    "rust.all_features": true,
+    "rust.goto_def_racer_fallback": true
+}

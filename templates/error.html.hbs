@@ -8,9 +8,14 @@
 
 <body>
     <h4 class="text-danger">An error has occurred</h4>
-    <div><strong>Message:</strong>{{message}}</div>
-    <div><strong>Cause:</strong>{{cause}}</div>
-    <div><strong>Backtrace:</strong>{{backtrace}}</div>
+    <div>
+        <strong>Message:</strong>{{message}}</div>
+    <div>
+        <strong>Cause:</strong>{{cause}}</div>
+    <div>
+        <strong>Backtrace:</strong>
+        <code style="white-space: pre">{{{backtrace}}}</code>
+    </div>
 </body>
 
 </html>

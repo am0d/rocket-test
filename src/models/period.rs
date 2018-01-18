@@ -1,11 +1,10 @@
-use std::str::FromStr;
 use schema::period;
 use diesel;
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
 use chrono::prelude::*;
 use util::errors::AppResult;
-use util::errors::AppError::{DatabaseError, TimeParseError};
+use util::time::date_from_str;
 
 #[derive(Insertable, Debug, Clone, Serialize)]
 #[table_name = "period"]
@@ -48,14 +47,14 @@ impl Period {
         period::table
             .filter(period::id.eq(id))
             .first::<Period>(conn)
-            .map_err(|e| DatabaseError { error: e })
+            .map_err(|e| app_error!(DatabaseError, e))
     }
 
     pub fn list(conn: &PgConnection) -> AppResult<Vec<Period>> {
         period::table
             .order(period::id)
             .load::<Period>(conn)
-            .map_err(|e| DatabaseError { error: e })
+            .map_err(|e| app_error!(DatabaseError, e))
     }
 
     pub fn save(&self, conn: &PgConnection) -> AppResult<Period> {
@@ -73,7 +72,7 @@ impl Period {
     fn update(&self, conn: &PgConnection) -> AppResult<Period> {
         use diesel::SaveChangesDsl;
         self.save_changes::<Period>(conn).map_err(|e| {
-            DatabaseError { error: e }
+            app_error!(DatabaseError, e)
         })
     }
 
@@ -97,21 +96,18 @@ impl NewPeriod {
         let period = diesel::insert(self)
             .into(period::table)
             .get_result(conn)
-            .map_err(|e| DatabaseError { error: e })?;
+            .map_err(|e| app_error!(DatabaseError, e))?;
         Ok(period)
     }
 }
 
 impl PeriodForm {
     pub fn save(&self, conn: &PgConnection) -> AppResult<Period> {
-        let start_date = DateTime::<Utc>::from_str(&*self.start_date)
-            .map_err(|e| TimeParseError { error: e })?
-            .naive_utc()
-            .date();
+        let start_date = date_from_str(&*self.start_date)?;
         let end_date = match self.end_date {
             Some(ref ed) => Some(
-                DateTime::<Utc>::from_str(&*ed)
-                    .map_err(|e| TimeParseError { error: e })?
+                DateTime::<FixedOffset>::parse_from_str(&*ed, "%Y-%m-%d")
+                    .map_err(|e| app_error!(TimeParseError, e))?
                     .naive_utc()
                     .date(),
             ),
