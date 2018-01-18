@@ -84,6 +84,12 @@ impl Period {
     }
 }
 
+impl Default for Period {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl NewPeriod {
     fn from(period: &Period) -> NewPeriod {
         NewPeriod {

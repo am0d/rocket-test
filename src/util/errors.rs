@@ -16,6 +16,7 @@ pub enum AppError {
     },
 }
 
+/// Create an error object, with an included backtrace
 #[macro_export]
 macro_rules! app_error {
     ($error_type: ident, $error: expr) => ({
