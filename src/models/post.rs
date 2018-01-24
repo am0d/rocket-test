@@ -11,7 +11,8 @@ struct NewPost<'a> {
     published: bool,
 }
 
-#[derive(Identifiable, Insertable, FromForm, Debug, Clone, AsChangeset, Queryable, Serialize, Default)]
+#[derive(Identifiable, Insertable, FromForm, Debug, Clone, AsChangeset, Queryable, Serialize,
+         Default)]
 #[table_name = "post"]
 pub struct Post {
     pub id: i32,
@@ -68,6 +69,9 @@ impl<'a> NewPost<'a> {
         }
     }
     fn insert(&self, conn: &PgConnection) -> bool {
-        diesel::insert(self).into(post::table).execute(conn).is_ok()
+        diesel::insert_into(post::table)
+            .values(self)
+            .execute(conn)
+            .is_ok()
     }
 }

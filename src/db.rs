@@ -1,8 +1,7 @@
 use std::ops::Deref;
 
-use r2d2;
-use r2d2::{Pool,PooledConnection};
-use r2d2_diesel::ConnectionManager;
+use diesel::r2d2;
+use diesel::r2d2::{Pool,PooledConnection,ConnectionManager};
 use diesel::pg::PgConnection;
 use dotenv::dotenv;
 use std::env;

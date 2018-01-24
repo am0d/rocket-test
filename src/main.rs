@@ -2,9 +2,6 @@
 #![plugin(rocket_codegen)]
 #![cfg_attr(any(feature = "clippy", feature="cargo-clippy"), allow(suspicious_else_formatting, needless_pass_by_value))]
 
-#[macro_use]
-extern crate diesel_codegen;
-
 /// Utility functions
 #[macro_use]
 pub mod util;
@@ -24,13 +21,13 @@ extern crate failure;
 #[macro_use]
 extern crate failure_derive;
 extern crate markdown;
-extern crate r2d2;
-extern crate r2d2_diesel;
 extern crate rocket;
 extern crate rocket_contrib;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
+
+pub use diesel::r2d2;
 
 use rocket_contrib::Template;
 use rocket::response::Redirect;

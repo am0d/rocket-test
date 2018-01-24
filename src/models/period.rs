@@ -71,9 +71,8 @@ impl Period {
 
     fn update(&self, conn: &PgConnection) -> AppResult<Period> {
         use diesel::SaveChangesDsl;
-        self.save_changes::<Period>(conn).map_err(|e| {
-            app_error!(DatabaseError, e)
-        })
+        self.save_changes::<Period>(conn)
+            .map_err(|e| app_error!(DatabaseError, e))
     }
 
     pub fn get_previous_period(&self, conn: &PgConnection) -> AppResult<Option<Period>> {
@@ -99,8 +98,8 @@ impl NewPeriod {
         }
     }
     fn insert(&self, conn: &PgConnection) -> AppResult<Period> {
-        let period = diesel::insert(self)
-            .into(period::table)
+        let period = diesel::insert_into(period::table)
+            .values(self)
             .get_result(conn)
             .map_err(|e| app_error!(DatabaseError, e))?;
         Ok(period)

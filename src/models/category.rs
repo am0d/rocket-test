@@ -9,7 +9,8 @@ struct NewCategory<'a> {
     name: &'a str,
 }
 
-#[derive(Identifiable, Insertable, FromForm, Debug, Clone, AsChangeset, Queryable, Serialize, Default)]
+#[derive(Identifiable, Insertable, FromForm, Debug, Clone, AsChangeset, Queryable, Serialize,
+         Default)]
 #[table_name = "category"]
 pub struct Category {
     pub id: i32,
@@ -65,11 +66,13 @@ impl Category {
 
 impl<'a> NewCategory<'a> {
     fn from(category: &'a Category) -> NewCategory<'a> {
-        NewCategory { name: &category.name }
+        NewCategory {
+            name: &category.name,
+        }
     }
     fn insert(&self, conn: &PgConnection) -> bool {
-        diesel::insert(self)
-            .into(category::table)
+        diesel::insert_into(category::table)
+            .values(self)
             .execute(conn)
             .is_ok()
     }

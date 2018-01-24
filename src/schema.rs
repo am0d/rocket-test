@@ -1,9 +1,25 @@
-//! # Database schema definition
-//!
-//! This module should not be used directly,
-//! instead, all database operations should go
-//! through models.
-//! Only the models should use the definitions
-//! from this module.
+table! {
+    category (id) {
+        id -> Int4,
+        name -> Varchar,
+    }
+}
 
-infer_schema!("dotenv:DATABASE_URL");
+table! {
+    period (id) {
+        id -> Int4,
+        name -> Varchar,
+        start_date -> Date,
+        end_date -> Nullable<Date>,
+        previous_period_id -> Nullable<Int4>,
+    }
+}
+
+table! {
+    post (id) {
+        id -> Int4,
+        title -> Varchar,
+        body -> Text,
+        published -> Bool,
+    }
+}
