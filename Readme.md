@@ -26,3 +26,4 @@ Goals for this application:
           }
       }
       ```
+    -  Should not be possible to query a tenanted table without filtering on tenant id
