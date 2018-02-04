@@ -2,6 +2,7 @@ use schema::category;
 use diesel;
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
+use util::*;
 
 #[derive(Insertable, Debug, Clone, Serialize)]
 #[table_name = "category"]
@@ -31,21 +32,21 @@ impl Category {
         }
     }
 
-    pub fn get(id: i32, conn: &PgConnection) -> Category {
+    pub fn get(id: i32, conn: &PgConnection) -> AppResult<Category> {
         category::table
             .filter(category::id.eq(id))
             .first::<Category>(conn)
-            .unwrap()
+            .map_err(|e| app_error!(DatabaseError, e))
     }
 
-    pub fn list(conn: &PgConnection) -> Vec<Category> {
+    pub fn list(conn: &PgConnection) -> AppResult<Vec<Category>> {
         category::table
             .order(category::id)
             .load::<Category>(conn)
-            .unwrap()
+            .map_err(|e| app_error!(DatabaseError, e))
     }
 
-    pub fn save(&self, conn: &PgConnection) -> bool {
+    pub fn save(&self, conn: &PgConnection) -> AppResult<Category> {
         if self.is_new() {
             NewCategory::from(self).insert(conn)
         } else {
@@ -57,10 +58,10 @@ impl Category {
         self.id == 0
     }
 
-    fn update(&self, conn: &PgConnection) -> bool {
+    fn update(&self, conn: &PgConnection) -> AppResult<Category> {
         use diesel::SaveChangesDsl;
-        self.save_changes::<Category>(conn).is_ok()
-        //diesel::update(category::table).set(self).execute(conn).is_ok()
+        self.save_changes::<Category>(conn)
+            .map_err(|e| app_error!(DatabaseError, e))
     }
 }
 
@@ -70,10 +71,10 @@ impl<'a> NewCategory<'a> {
             name: &category.name,
         }
     }
-    fn insert(&self, conn: &PgConnection) -> bool {
+    fn insert(&self, conn: &PgConnection) -> AppResult<Category> {
         diesel::insert_into(category::table)
             .values(self)
-            .execute(conn)
-            .is_ok()
+            .get_result(conn)
+            .map_err(|e| app_error!(DatabaseError, e))
     }
 }

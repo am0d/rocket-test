@@ -1,6 +1,7 @@
 use diesel::result::Error as diesel_error;
 use chrono::ParseError as chrono_error;
 use failure::{Backtrace, Fail};
+use rocket_contrib::Template;
 
 #[derive(Fail, Debug)]
 pub enum AppError {
@@ -44,3 +45,9 @@ impl ErrorTemplateContext {
         }
     }
 }
+
+pub fn error_page(e: AppError) -> Template {
+    let context = ErrorTemplateContext::from(e);
+    Template::render("error", &context)
+}
+

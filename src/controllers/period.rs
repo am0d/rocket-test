@@ -6,7 +6,7 @@ use std::vec::Vec;
 use db;
 use models;
 use super::context::{IndexTemplateContext, TemplateContext};
-use util::errors::ErrorTemplateContext;
+use util::*;
 
 /// Returns all the routes defined on this controller
 pub fn all_routes() -> Vec<rocket::Route> {
@@ -32,8 +32,7 @@ pub fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> Template {
             Template::render("period/index", &context)
         }
         Err(e) => {
-            let context = ErrorTemplateContext::from(e);
-            Template::render("error", &context)
+            error_page(e)
         }
     }
 }
@@ -59,8 +58,7 @@ pub fn edit_get(id: i32, conn: db::PgSqlConn, message: Option<FlashMessage>) -> 
             Template::render("period/edit", &context)
         }
         Err(e) => {
-            let context = ErrorTemplateContext::from(e);
-            Template::render("error", &context)
+            error_page(e)
         }
     }
 }
@@ -81,8 +79,7 @@ pub fn edit_post(
         match period.save(&conn) {
             Ok(_) => Ok(Flash::success(Redirect::to("/periods"), "Period saved.")),
             Err(e) => {
-                let context = ErrorTemplateContext::from(e);
-                Err(Template::render("error", &context))
+                Err(error_page(e))
             }
         }
     }

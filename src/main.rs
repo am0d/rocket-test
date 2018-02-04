@@ -1,4 +1,4 @@
-#![feature(plugin, custom_derive, custom_attribute)]
+#![feature(plugin, custom_derive, custom_attribute,conservative_impl_trait)]
 #![plugin(rocket_codegen)]
 #![cfg_attr(any(feature = "clippy", feature="cargo-clippy"), allow(suspicious_else_formatting, needless_pass_by_value))]
 
