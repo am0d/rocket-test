@@ -1,17 +1,12 @@
+/// Budget periods.
+
 use schema::period;
 use diesel;
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
 use chrono::prelude::*;
 use util::*;
-
-#[derive(Insertable, Debug, Clone, Serialize)]
-#[table_name = "period"]
-struct NewPeriod {
-    name: String,
-    start_date: NaiveDate,
-    end_date: Option<NaiveDate>,
-}
+use models::crud::Crud;
 
 #[derive(Identifiable, Insertable, Debug, Clone, AsChangeset, Queryable, Serialize)]
 #[table_name = "period"]
@@ -42,38 +37,6 @@ impl Period {
         }
     }
 
-    pub fn get(id: i32, conn: &PgConnection) -> AppResult<Period> {
-        period::table
-            .filter(period::id.eq(id))
-            .first::<Period>(conn)
-            .map_err(|e| app_error!(DatabaseError, e))
-    }
-
-    pub fn list(conn: &PgConnection) -> AppResult<Vec<Period>> {
-        period::table
-            .order(period::id)
-            .load::<Period>(conn)
-            .map_err(|e| app_error!(DatabaseError, e))
-    }
-
-    pub fn save(&self, conn: &PgConnection) -> AppResult<Period> {
-        if self.is_new() {
-            NewPeriod::from(self).insert(conn)
-        } else {
-            self.update(conn)
-        }
-    }
-
-    pub fn is_new(&self) -> bool {
-        self.id == 0
-    }
-
-    fn update(&self, conn: &PgConnection) -> AppResult<Period> {
-        use diesel::SaveChangesDsl;
-        self.save_changes::<Period>(conn)
-            .map_err(|e| app_error!(DatabaseError, e))
-    }
-
     pub fn get_previous_period(&self, conn: &PgConnection) -> AppResult<Option<Period>> {
         match self.previous_period_id {
             None => Ok(None),
@@ -82,26 +45,11 @@ impl Period {
     }
 }
 
+impl_crud!(Period, period);
+
 impl Default for Period {
     fn default() -> Self {
         Self::new()
-    }
-}
-
-impl NewPeriod {
-    fn from(period: &Period) -> NewPeriod {
-        NewPeriod {
-            name: period.name.clone(),
-            start_date: period.start_date,
-            end_date: period.end_date,
-        }
-    }
-    fn insert(&self, conn: &PgConnection) -> AppResult<Period> {
-        let period = diesel::insert_into(period::table)
-            .values(self)
-            .get_result(conn)
-            .map_err(|e| app_error!(DatabaseError, e))?;
-        Ok(period)
     }
 }
 

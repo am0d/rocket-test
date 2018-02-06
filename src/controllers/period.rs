@@ -7,6 +7,7 @@ use db;
 use models;
 use super::context::{IndexTemplateContext, TemplateContext};
 use util::*;
+use models::crud::Crud;
 
 /// Returns all the routes defined on this controller
 pub fn all_routes() -> Vec<rocket::Route> {

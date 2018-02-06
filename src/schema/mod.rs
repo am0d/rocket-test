@@ -1,4 +1,4 @@
-/// Defines the database schema.
+//! Defines the database schema.
 
 mod db_schema;
 pub use self::db_schema::*;

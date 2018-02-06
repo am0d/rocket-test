@@ -1,3 +1,5 @@
+
+//! Database connection helper functions
 use std::ops::Deref;
 
 use diesel::r2d2;
@@ -11,6 +13,7 @@ use rocket::request::{self, FromRequest};
 use rocket::{Request, State, Outcome};
 
 pub type PgSqlPool = r2d2::Pool<ConnectionManager<PgConnection>>;
+
 
 pub fn establish_connection() -> PgSqlPool {
     dotenv().ok();

@@ -1,3 +1,5 @@
+//! The controllers providing the endpoints for the application
+
 use rocket::Rocket;
 
 pub mod category;

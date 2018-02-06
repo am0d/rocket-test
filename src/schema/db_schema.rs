@@ -1,4 +1,4 @@
-/// Diesel generated database schema
+//! Diesel generated database schema
 
 table! {
     category (id) {
@@ -18,11 +18,11 @@ table! {
 }
 
 table! {
-    periodcategory (periodid, categoryid) {
-        periodid -> Int4,
-        categoryid -> Int4,
-        budgetedamount -> Int4,
-        remainingamount -> Int4,
+    periodcategory (period_id, category_id) {
+        period_id -> Int4,
+        category_id -> Int4,
+        budgeted_amount -> Int4,
+        remaining_amount -> Int4,
     }
 }
 
@@ -30,17 +30,17 @@ table! {
     transaction (id) {
         id -> Int4,
         description -> Varchar,
-        transactiondate -> Nullable<Timestamp>,
+        transaction_date -> Nullable<Timestamp>,
         amount -> Int4,
-        periodid -> Int4,
-        categoryid -> Int4,
+        period_id -> Int4,
+        category_id -> Int4,
     }
 }
 
-joinable!(periodcategory -> category (categoryid));
-joinable!(periodcategory -> period (periodid));
-joinable!(transaction -> category (categoryid));
-joinable!(transaction -> period (periodid));
+joinable!(periodcategory -> category (category_id));
+joinable!(periodcategory -> period (period_id));
+joinable!(transaction -> category (category_id));
+joinable!(transaction -> period (period_id));
 
 allow_tables_to_appear_in_same_query!(
     category,

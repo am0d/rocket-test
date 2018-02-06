@@ -4,12 +4,6 @@ use diesel::prelude::*;
 use diesel::pg::PgConnection;
 use util::*;
 
-#[derive(Insertable, Debug, Clone, Serialize)]
-#[table_name = "category"]
-struct NewCategory<'a> {
-    name: &'a str,
-}
-
 #[derive(Identifiable, Insertable, FromForm, Debug, Clone, AsChangeset, Queryable, Serialize,
          Default)]
 #[table_name = "category"]
@@ -48,7 +42,7 @@ impl Category {
 
     pub fn save(&self, conn: &PgConnection) -> AppResult<Category> {
         if self.is_new() {
-            NewCategory::from(self).insert(conn)
+            self.insert(conn)
         } else {
             self.update(conn)
         }
@@ -58,23 +52,16 @@ impl Category {
         self.id == 0
     }
 
-    fn update(&self, conn: &PgConnection) -> AppResult<Category> {
-        use diesel::SaveChangesDsl;
-        self.save_changes::<Category>(conn)
-            .map_err(|e| app_error!(DatabaseError, e))
-    }
-}
-
-impl<'a> NewCategory<'a> {
-    fn from(category: &'a Category) -> NewCategory<'a> {
-        NewCategory {
-            name: &category.name,
-        }
-    }
     fn insert(&self, conn: &PgConnection) -> AppResult<Category> {
         diesel::insert_into(category::table)
             .values(self)
             .get_result(conn)
+            .map_err(|e| app_error!(DatabaseError, e))
+    }
+
+    fn update(&self, conn: &PgConnection) -> AppResult<Category> {
+        use diesel::SaveChangesDsl;
+        self.save_changes::<Category>(conn)
             .map_err(|e| app_error!(DatabaseError, e))
     }
 }

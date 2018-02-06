@@ -83,8 +83,6 @@ pub fn edit_post(
             )),
             Err(e) => {
                 Err(error_page(e))
-                // let context = ErrorTemplateContext::from(e);
-                // Err(Template::render("error", &context))
             }
         }
     }
