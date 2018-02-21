@@ -7,12 +7,14 @@ use rocket_contrib::Template;
 pub enum AppError {
     #[fail(display = "Database error occurred: {}", error)]
     DatabaseError {
-        #[cause] error: diesel_error,
+        #[cause]
+        error: diesel_error,
         backtrace: Backtrace,
     },
     #[fail(display = "Parsing (time) error occurred: {}", error)]
     TimeParseError {
-        #[cause] error: chrono_error,
+        #[cause]
+        error: chrono_error,
         backtrace: Backtrace,
     },
 }
@@ -50,4 +52,3 @@ pub fn error_page(e: AppError) -> Template {
     let context = ErrorTemplateContext::from(e);
     Template::render("error", &context)
 }
-

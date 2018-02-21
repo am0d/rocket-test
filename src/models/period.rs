@@ -6,7 +6,7 @@ use diesel::prelude::*;
 use diesel::pg::PgConnection;
 use chrono::prelude::*;
 use util::*;
-use models::crud::Crud;
+use models::prelude::*;
 
 #[derive(Identifiable, Insertable, Debug, Clone, AsChangeset, Queryable, Serialize)]
 #[table_name = "period"]
@@ -18,7 +18,7 @@ pub struct Period {
     pub previous_period_id: Option<i32>,
 }
 
-#[derive(FromForm)]
+#[derive(FromForm, Serialize, Debug)]
 pub struct PeriodForm {
     pub id: i32,
     pub name: String,
@@ -73,5 +73,32 @@ impl PeriodForm {
             previous_period_id: None,
         };
         period.save(conn)
+    }
+}
+
+impl From<Period> for PeriodForm {
+    fn from(period: Period) -> PeriodForm {
+        PeriodForm {
+            id: period.id,
+            name: period.name,
+            start_date: period.start_date.to_string(),
+            end_date: period.end_date.map(|d| d.to_string()),
+        }
+    }
+}
+
+impl Validate for PeriodForm {
+    fn is_valid(&self) -> ValidateResult {
+        let mut errors = vec![];
+        if self.name.is_empty() {
+            errors.push(String::from("Name cannot be empty"));
+        }
+        if date_from_str(&self.start_date).is_err() {
+            errors.push(String::from("Start date must be valid"));
+        }
+        match errors.len() {
+            0 => ValidateResult::Valid,
+            _ => ValidateResult::Invalid(errors),
+        }
     }
 }

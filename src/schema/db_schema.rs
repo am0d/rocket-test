@@ -42,9 +42,4 @@ joinable!(periodcategory -> period (period_id));
 joinable!(transaction -> category (category_id));
 joinable!(transaction -> period (period_id));
 
-allow_tables_to_appear_in_same_query!(
-    category,
-    period,
-    periodcategory,
-    transaction,
-);
+allow_tables_to_appear_in_same_query!(category, period, periodcategory, transaction,);

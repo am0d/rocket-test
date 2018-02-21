@@ -3,16 +3,16 @@ use diesel;
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
 use util::*;
+use models::prelude::*;
 
-#[derive(Identifiable, Insertable, FromForm, Debug, Clone, AsChangeset, Queryable, Serialize,
-         Default)]
+#[derive(Identifiable, Insertable, Debug, Clone, AsChangeset, Queryable, Serialize, Default)]
 #[table_name = "category"]
 pub struct Category {
     pub id: i32,
     pub name: String,
 }
 
-#[derive(FromForm, Debug, Clone)]
+#[derive(FromForm, Debug, Clone, Serialize)]
 pub struct CategoryForm {
     pub id: i32,
     pub name: String,
@@ -25,43 +25,38 @@ impl Category {
             name: "".to_string(),
         }
     }
+}
 
-    pub fn get(id: i32, conn: &PgConnection) -> AppResult<Category> {
-        category::table
-            .filter(category::id.eq(id))
-            .first::<Category>(conn)
-            .map_err(|e| app_error!(DatabaseError, e))
-    }
+impl_crud!(Category, category);
 
-    pub fn list(conn: &PgConnection) -> AppResult<Vec<Category>> {
-        category::table
-            .order(category::id)
-            .load::<Category>(conn)
-            .map_err(|e| app_error!(DatabaseError, e))
-    }
-
+impl CategoryForm {
     pub fn save(&self, conn: &PgConnection) -> AppResult<Category> {
-        if self.is_new() {
-            self.insert(conn)
-        } else {
-            self.update(conn)
+        let category = Category {
+            id: self.id,
+            name: self.name.clone(),
+        };
+        category.save(conn)
+    }
+}
+
+impl Validate for CategoryForm {
+    fn is_valid(&self) -> ValidateResult {
+        let mut errors = vec![];
+        if self.name.is_empty() {
+            errors.push(String::from("Name is required"));
+        }
+        match errors.len() {
+            0 => ValidateResult::Valid,
+            _ => ValidateResult::Invalid(errors),
         }
     }
+}
 
-    pub fn is_new(&self) -> bool {
-        self.id == 0
-    }
-
-    fn insert(&self, conn: &PgConnection) -> AppResult<Category> {
-        diesel::insert_into(category::table)
-            .values(self)
-            .get_result(conn)
-            .map_err(|e| app_error!(DatabaseError, e))
-    }
-
-    fn update(&self, conn: &PgConnection) -> AppResult<Category> {
-        use diesel::SaveChangesDsl;
-        self.save_changes::<Category>(conn)
-            .map_err(|e| app_error!(DatabaseError, e))
+impl From<Category> for CategoryForm {
+    fn from(category: Category) -> CategoryForm {
+        CategoryForm {
+            id: category.id,
+            name: category.name,
+        }
     }
 }

@@ -1,19 +1,17 @@
-
 //! Database connection helper functions
 use std::ops::Deref;
 
 use diesel::r2d2;
-use diesel::r2d2::{Pool,PooledConnection,ConnectionManager};
+use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
 use diesel::pg::PgConnection;
 use dotenv::dotenv;
 use std::env;
 
 use rocket::http::Status;
 use rocket::request::{self, FromRequest};
-use rocket::{Request, State, Outcome};
+use rocket::{Outcome, Request, State};
 
 pub type PgSqlPool = r2d2::Pool<ConnectionManager<PgConnection>>;
-
 
 pub fn establish_connection() -> PgSqlPool {
     dotenv().ok();
@@ -41,12 +39,12 @@ impl<'a, 'r> FromRequest<'a, 'r> for PgSqlConn {
         let pool = match <State<PgSqlPool> as FromRequest>::from_request(request) {
             Outcome::Success(pool) => pool,
             Outcome::Failure(e) => return Outcome::Failure(e),
-            Outcome::Forward(_) => return Outcome::Forward(())
+            Outcome::Forward(_) => return Outcome::Forward(()),
         };
 
         match pool.get() {
             Ok(conn) => Outcome::Success(PgSqlConn(conn)),
-            Err(_) => Outcome::Failure((Status::ServiceUnavailable, ()))
+            Err(_) => Outcome::Failure((Status::ServiceUnavailable, ())),
         }
     }
 }

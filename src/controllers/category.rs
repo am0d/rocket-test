@@ -7,10 +7,21 @@ use db;
 use models;
 use super::context::{IndexTemplateContext, TemplateContext};
 use util::*;
+use models::prelude::*;
 
 /// Returns all the routes defined on this controller
 pub fn all_routes() -> Vec<rocket::Route> {
     routes![index, edit_get, edit_post]
+}
+
+/// Returns the edit view for a given category
+fn edit_view(category_form: models::category::CategoryForm, flash: Option<String>) -> Template {
+    let context = TemplateContext {
+        model: category_form,
+        flash: flash,
+        extra_data: (),
+    };
+    Template::render("category/edit", &context)
 }
 
 /// Lists all the categories
@@ -31,9 +42,7 @@ pub fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> Template {
             };
             Template::render("category/index", &context)
         }
-        Err(e) => {
-            error_page(e)
-        }
+        Err(e) => error_page(e),
     }
 }
 
@@ -49,41 +58,27 @@ pub fn edit_get(id: i32, conn: db::PgSqlConn, message: Option<FlashMessage>) -> 
         _ => models::category::Category::get(id, &conn),
     };
     match category {
-        Ok(category) => {
-            let context = TemplateContext {
-                model: category,
-                flash: flash,
-                extra_data: (),
-            };
-            Template::render("category/edit", &context)
-        }
-        Err(e) => {
-            error_page(e)
-        }
+        Ok(category) => edit_view(models::category::CategoryForm::from(category), flash),
+        Err(e) => error_page(e),
     }
 }
 
-#[post("/<id>/edit", data = "<category_form>")]
+#[post("/<_id>/edit", data = "<category_form>")]
 pub fn edit_post(
-    id: u32,
-    category_form: Form<models::category::Category>,
+    _id: u32,
+    category_form: Form<models::category::CategoryForm>,
     conn: db::PgSqlConn,
 ) -> Result<Flash<Redirect>, Template> {
-    let category = category_form.into_inner();
-    if category.name.is_empty() {
-        Ok(Flash::error(
-            Redirect::to(&format!("/categories/{0}/edit", id)),
-            "Name cannot be empty",
-        ))
-    } else {
-        match category.save(&conn) {
+    let category_form = category_form.into_inner();
+    let is_valid = category_form.is_valid();
+    match is_valid {
+        ValidateResult::Invalid(_) => Err(edit_view(category_form, Some(String::from(is_valid)))),
+        ValidateResult::Valid => match category_form.save(&conn) {
             Ok(_) => Ok(Flash::success(
                 Redirect::to("/categories"),
                 "Category saved.",
             )),
-            Err(e) => {
-                Err(error_page(e))
-            }
-        }
+            Err(e) => Err(error_page(e)),
+        },
     }
 }
