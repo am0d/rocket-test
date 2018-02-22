@@ -1,12 +1,11 @@
-use rocket_contrib::Template;
 use rocket;
 use rocket::request::{FlashMessage, Form};
-use rocket::response::{Flash, Redirect};
 use std::vec::Vec;
 use db;
 use models;
 use super::context::{IndexTemplateContext, TemplateContext};
 use util::*;
+use util::response::*;
 use models::prelude::*;
 
 /// Returns all the routes defined on this controller
@@ -15,18 +14,21 @@ pub fn all_routes() -> Vec<rocket::Route> {
 }
 
 /// Returns the edit view for a given category
-fn edit_view(category_form: models::category::CategoryForm, flash: Option<String>) -> Template {
+fn edit_view<M>(category_form: M, flash: Option<String>) -> response::Response
+where
+    M: Into<models::category::CategoryForm>,
+{
     let context = TemplateContext {
-        model: category_form,
+        model: category_form.into(),
         flash: flash,
         extra_data: (),
     };
-    Template::render("category/edit", &context)
+    view("category/edit", &context)
 }
 
 /// Lists all the categories
 #[get("/")]
-pub fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> Template {
+pub fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> response::Response {
     let flash = if let Some(message) = message {
         Some(message.msg().to_string())
     } else {
@@ -40,14 +42,14 @@ pub fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> Template {
                 flash: flash,
                 extra_data: (),
             };
-            Template::render("category/index", &context)
+            view("category/index", &context)
         }
-        Err(e) => error_page(e),
+        Err(e) => error(e),
     }
 }
 
 #[get("/<id>/edit")]
-pub fn edit_get(id: i32, conn: db::PgSqlConn, message: Option<FlashMessage>) -> Template {
+pub fn edit_get(id: i32, conn: db::PgSqlConn, message: Option<FlashMessage>) -> response::Response {
     let flash = if let Some(message) = message {
         Some(message.msg().to_string())
     } else {
@@ -58,8 +60,8 @@ pub fn edit_get(id: i32, conn: db::PgSqlConn, message: Option<FlashMessage>) -> 
         _ => models::category::Category::get(id, &conn),
     };
     match category {
-        Ok(category) => edit_view(models::category::CategoryForm::from(category), flash),
-        Err(e) => error_page(e),
+        Ok(category) => edit_view(category, flash),
+        Err(e) => error(e),
     }
 }
 
@@ -68,17 +70,14 @@ pub fn edit_post(
     _id: u32,
     category_form: Form<models::category::CategoryForm>,
     conn: db::PgSqlConn,
-) -> Result<Flash<Redirect>, Template> {
+) -> response::Response {
     let category_form = category_form.into_inner();
     let is_valid = category_form.is_valid();
     match is_valid {
-        ValidateResult::Invalid(_) => Err(edit_view(category_form, Some(String::from(is_valid)))),
+        ValidateResult::Invalid(_) => edit_view(category_form, Some(String::from(is_valid))),
         ValidateResult::Valid => match category_form.save(&conn) {
-            Ok(_) => Ok(Flash::success(
-                Redirect::to("/categories"),
-                "Category saved.",
-            )),
-            Err(e) => Err(error_page(e)),
+            Ok(_) => saved("/categories"),
+            Err(e) => error(e),
         },
     }
 }

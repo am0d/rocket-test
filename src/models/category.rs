@@ -31,11 +31,18 @@ impl_crud!(Category, category);
 
 impl CategoryForm {
     pub fn save(&self, conn: &PgConnection) -> AppResult<Category> {
-        let category = Category {
-            id: self.id,
-            name: self.name.clone(),
-        };
-        category.save(conn)
+        match self.is_valid() {
+            ValidateResult::Valid => {
+                let category = Category {
+                    id: self.id,
+                    name: self.name.clone(),
+                };
+                category.save(conn)
+            }
+            errors @ ValidateResult::Invalid(_) => {
+                Err(errors::AppError::ValidationError { errors })
+            }
+        }
     }
 }
 

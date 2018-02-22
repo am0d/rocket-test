@@ -2,6 +2,7 @@ use diesel::result::Error as diesel_error;
 use chrono::ParseError as chrono_error;
 use failure::{Backtrace, Fail};
 use rocket_contrib::Template;
+use models::validate::ValidateResult;
 
 #[derive(Fail, Debug)]
 pub enum AppError {
@@ -17,6 +18,8 @@ pub enum AppError {
         error: chrono_error,
         backtrace: Backtrace,
     },
+    #[fail(display = "Invalid object: {}", errors)]
+    ValidationError { errors: ValidateResult },
 }
 
 /// Create an error object, with an included backtrace
