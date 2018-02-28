@@ -30,6 +30,10 @@ impl Category {
 impl_crud!(Category, category);
 
 impl CategoryForm {
+    pub fn is_new(&self) -> bool {
+        self.id == 0
+    }
+    
     pub fn save(&self, conn: &PgConnection) -> AppResult<Category> {
         match self.is_valid() {
             ValidateResult::Valid => {

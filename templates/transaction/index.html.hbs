@@ -1,13 +1,13 @@
 {{#*inline "page"}}
-<a href="/categories/0/edit">New Category</a>
-<h4>Categories:</h4>
+<a href="/transactions/0/edit">New Transaction</a>
+<h4>Transactions:</h4>
 {{#if flash}}
 <div class="text-danger">{{flash}}</div>
 {{/if}}
 <ul>
     {{#each model}}
     <li>
-        <a href="/categories/{{id}}/edit">{{name}}</a>
+        <a href="/transactions/{{id}}/edit">{{description}}</a>
     </li>
     {{/each}}
 </ul>

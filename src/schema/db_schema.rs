@@ -30,7 +30,7 @@ table! {
     transaction (id) {
         id -> Int4,
         description -> Varchar,
-        transaction_date -> Nullable<Timestamp>,
+        transaction_date -> Nullable<Date>,
         amount -> Int4,
         period_id -> Int4,
         category_id -> Int4,

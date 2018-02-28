@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use rocket;
 use rocket::request::{FlashMessage, Form};
 use std::vec::Vec;
@@ -18,9 +19,16 @@ fn edit_view<M>(category_form: M, flash: Option<String>) -> response::Response
 where
     M: Into<models::category::CategoryForm>,
 {
+    let category_form = category_form.into();
+    let title: Cow<'static, str> = if category_form.is_new() {
+        "New Category".into()
+    } else {
+        category_form.name.clone().into()
+    };
     let context = TemplateContext {
-        model: category_form.into(),
+        model: category_form,
         flash: flash,
+        title: title,
         extra_data: (),
     };
     view("category/edit", &context)
@@ -40,6 +48,7 @@ pub fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> response::Re
             let context = IndexTemplateContext {
                 model: categories,
                 flash: flash,
+                title: "Categories".into(),
                 extra_data: (),
             };
             view("category/index", &context)

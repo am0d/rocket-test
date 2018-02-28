@@ -12,7 +12,7 @@ CREATE TABLE PeriodCategory (
 CREATE TABLE Transaction (
     id SERIAL PRIMARY KEY,
     description VARCHAR NOT NULL DEFAULT '',
-    transaction_date TIMESTAMP,
+    transaction_date DATE,
     amount INTEGER NOT NULL DEFAULT 0, -- Stored as cents, negative / positive
     period_id INTEGER REFERENCES Period (Id) NOT NULL,
     category_id INTEGER REFERENCES Category (Id) NOT NULL,

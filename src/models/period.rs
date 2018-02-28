@@ -7,6 +7,7 @@ use diesel::pg::PgConnection;
 use chrono::prelude::*;
 use util::*;
 use models::prelude::*;
+use models::transaction::Transaction;
 
 #[derive(Identifiable, Insertable, Debug, Clone, AsChangeset, Queryable, Serialize)]
 #[table_name = "period"]
@@ -43,6 +44,10 @@ impl Period {
             Some(id) => Ok(Some(Self::get(id, conn)?)),
         }
     }
+
+    pub fn get_transactions(&self, conn: &PgConnection) -> AppResult<Vec<Transaction>> {
+        Transaction::get_by_period(self.id, conn)
+    }
 }
 
 impl_crud!(Period, period);
@@ -54,6 +59,10 @@ impl Default for Period {
 }
 
 impl PeriodForm {
+    pub fn is_new(&self) -> bool {
+        self.id == 0
+    }
+
     pub fn save(&self, conn: &PgConnection) -> AppResult<Period> {
         let start_date = date_from_str(&*self.start_date)?;
         let end_date = match self.end_date {

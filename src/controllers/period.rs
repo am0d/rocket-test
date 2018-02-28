@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use rocket;
 use rocket::request::{FlashMessage, Form};
 use std::vec::Vec;
@@ -14,10 +15,20 @@ pub fn all_routes() -> Vec<rocket::Route> {
 }
 
 /// Renders the edit view for a given period
-fn edit_view(period_form: models::period::PeriodForm, flash: Option<String>) -> response::Response {
+fn edit_view<T>(period_form: T, flash: Option<String>) -> response::Response
+where
+    T: Into<models::period::PeriodForm>,
+{
+    let period_form = period_form.into();
+    let title: Cow<'static, str> = if period_form.is_new() {
+        "New Period".into()
+    } else {
+        period_form.name.clone().into()
+    };
     let context = TemplateContext {
         model: period_form,
         flash: flash,
+        title: title,
         extra_data: (),
     };
     view("period/edit", &context)
@@ -37,6 +48,7 @@ pub fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> response::Re
             let context = IndexTemplateContext {
                 model: periods,
                 flash: flash,
+                title: "Periods".into(),
                 extra_data: (),
             };
             view("period/index", &context)
@@ -58,7 +70,7 @@ pub fn edit_get(id: i32, conn: db::PgSqlConn, message: Option<FlashMessage>) -> 
         _ => models::period::Period::get(id, &conn),
     };
     match period {
-        Ok(period) => edit_view(models::period::PeriodForm::from(period), flash),
+        Ok(period) => edit_view(period, flash),
         Err(e) => error(e),
     }
 }

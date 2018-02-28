@@ -1,24 +1,14 @@
-<!doctype html>
-<html>
-
-<head>
-    <title>Periods</title>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-</head>
-
-<body>
-    <div class="container">
-        <a href="/periods/0/edit">New Period</a>
-        <h4>Period:</h4>
-        {{#if flash}}
-        <div class="text-danger">{{flash}}</div>
-        {{/if}}
-        <ul>
-            {{#each model}}
-            <li><a href="/periods/{{id}}/edit">{{name}}</a></li>
-            {{/each}}
-        </ul>
-    </div>
-</body>
-
-</html>
+{{#*inline "page"}}
+<a href="/periods/0/edit">New Period</a>
+<h4>Period:</h4>
+{{#if flash}}
+<div class="text-danger">{{flash}}</div>
+{{/if}}
+<ul>
+    {{#each model}}
+    <li>
+        <a href="/periods/{{id}}/edit">{{name}}</a>
+    </li>
+    {{/each}}
+</ul>
+{{/inline}}{{~> layout ~}}
