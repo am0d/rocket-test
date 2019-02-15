@@ -1,25 +1,25 @@
 use diesel::result::Error as diesel_error;
 use chrono::ParseError as chrono_error;
 use failure::{Backtrace, Fail};
-use rocket_contrib::Template;
+use rocket_contrib::templates::Template;
 use models::validate::ValidateResult;
 
 #[derive(Fail, Debug)]
 pub enum AppError {
     #[fail(display = "Database error occurred: {}", error)]
     DatabaseError {
-        #[cause]
-        error: diesel_error,
+        #[cause] error: diesel_error,
         backtrace: Backtrace,
     },
     #[fail(display = "Parsing (time) error occurred: {}", error)]
     TimeParseError {
-        #[cause]
-        error: chrono_error,
+        #[cause] error: chrono_error,
         backtrace: Backtrace,
     },
     #[fail(display = "Invalid object: {}", errors)]
-    ValidationError { errors: ValidateResult },
+    ValidationError {
+        errors: ValidateResult,
+    },
 }
 
 /// Create an error object, with an included backtrace

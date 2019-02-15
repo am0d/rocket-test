@@ -5,7 +5,8 @@ use serde::Serialize;
 use rocket::http::Status;
 use rocket::request::Request;
 use rocket::response::{Redirect, Responder, Response as RocketResponse};
-use rocket_contrib::Template;
+use rocket::http::uri::Origin;
+use rocket_contrib::templates::Template;
 use util::errors::{error_page, AppError};
 
 /// The types of application responses available
@@ -51,9 +52,9 @@ impl<'r> Responder<'r> for Response {
     fn respond_to(self, request: &Request) -> Result<RocketResponse<'r>, Status> {
         match self {
             Response::View { template } => template.respond_to(request),
-            Response::Saved { redirect_location } => {
-                Redirect::to(&redirect_location).respond_to(request)
-            }
+            Response::Saved { redirect_location } => Redirect::to(
+                Origin::parse_owned(String::from(redirect_location)).expect("Invalid redirect"),
+            ).respond_to(request),
             Response::Error { error } => error_page(error).respond_to(request),
         }
     }

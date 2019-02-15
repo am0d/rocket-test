@@ -1,5 +1,4 @@
-#![feature(plugin, custom_derive, custom_attribute, conservative_impl_trait)]
-#![plugin(rocket_codegen)]
+#![feature(custom_attribute, proc_macro_hygiene, decl_macro)]
 #![cfg_attr(any(feature = "clippy", feature = "cargo-clippy"),
             allow(suspicious_else_formatting, needless_pass_by_value))]
 
@@ -15,16 +14,17 @@ extern crate chrono;
 extern crate diesel;
 extern crate dotenv;
 extern crate failure;
-#[macro_use]
+//#[macro_use]
 extern crate failure_derive;
 extern crate markdown;
+#[macro_use]
 extern crate rocket;
 extern crate rocket_contrib;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 
-use rocket_contrib::Template;
+use rocket_contrib::templates::Template;
 use rocket::response::Redirect;
 
 #[get("/")]
