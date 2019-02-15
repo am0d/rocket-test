@@ -1,0 +1,15 @@
+{{#*inline "page"}}
+<h4>{{model.name}}</h4>
+{{#if flash}}
+<div class="text-danger">{{flash}}</div>
+{{/if}}
+<div>{{model.start_date}}</div>
+<div><a href="/periods/{{model.id}}/edit">Edit</a></div>
+<h2>Transactions</h2>
+<ul>
+    {{#each transactions}}
+    <li>
+        <a href="/transactions/{{id}}">{{name}}</a>
+    </li>
+    {{/each}}</ul>
+{{/inline}}{{~> layout ~}}

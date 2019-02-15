@@ -1,9 +1,13 @@
 #[macro_export]
 macro_rules! impl_crud {
-    ($table: ident, $table_type: ident) => {
+    ($table: ident, $new_type: ident, $table_type: ident) => {
         impl Crud for $table {
+            type Table = $table_type::table;
+            type Id = $table_type::id;
+            type NewRecord = $new_type;
 
             fn get(id: i32, conn: &PgConnection) -> AppResult<Self>
+                where Self:Sized,
             {
                 $table_type::table
                     .filter($table_type::id.eq(id))
@@ -21,29 +25,19 @@ macro_rules! impl_crud {
                     .map_err(|e| app_error!(DatabaseError, e))
             }
 
+            fn is_new(&self) -> bool {
+                self.id == 0
+            }
+
             fn save(&self, conn: &PgConnection) -> AppResult<Self>
             where
                 Self: Sized,
             {
                 if self.is_new() {
-                    self.insert(conn)
+                    $new_type::from(self).insert(conn)
                 } else {
                     self.update(conn)
                 }
-            }
-
-            fn is_new(&self) -> bool {
-                self.id == 0
-            }
-
-            fn insert(&self, conn: &PgConnection) -> AppResult<Self>
-            where
-                Self: Sized,
-            {
-                diesel::insert_into($table_type::table)
-                    .values(self)
-                    .get_result(conn)
-                    .map_err(|e| app_error!(DatabaseError, e))
             }
 
             fn update(&self, conn: &PgConnection) -> AppResult<Self>

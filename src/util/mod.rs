@@ -9,3 +9,5 @@ pub mod response;
 
 pub use self::errors::{error_page, AppResult, ErrorTemplateContext};
 pub use self::time::date_from_str;
+
+pub type Cents = i32;

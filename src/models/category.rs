@@ -12,6 +12,12 @@ pub struct Category {
     pub name: String,
 }
 
+#[derive(Insertable, Debug)]
+#[table_name = "category"]
+pub struct NewCategory {
+    pub name: String,
+}
+
 #[derive(FromForm, Debug, Clone, Serialize)]
 pub struct CategoryForm {
     pub id: i32,
@@ -27,13 +33,32 @@ impl Category {
     }
 }
 
-impl_crud!(Category, category);
+impl_crud!(Category, NewCategory, category);
+
+impl NewCategory {
+    fn insert(&self, conn: &PgConnection) -> AppResult<Category>
+    where
+        Self: Sized,
+    {
+        diesel::insert_into(category::table)
+            .values(self)
+            .get_result(conn)
+            .map_err(|e| app_error!(DatabaseError, e))
+    }
+}
+impl<'a> From<&'a Category> for NewCategory {
+    fn from(category: &'a Category) -> NewCategory {
+        NewCategory {
+            name: category.name.clone(),
+        }
+    }
+}
 
 impl CategoryForm {
     pub fn is_new(&self) -> bool {
         self.id == 0
     }
-    
+
     pub fn save(&self, conn: &PgConnection) -> AppResult<Category> {
         match self.is_valid() {
             ValidateResult::Valid => {

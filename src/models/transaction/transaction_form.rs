@@ -1,23 +1,7 @@
-/// Individual budget transactions.
-
-use schema::transaction;
-use diesel;
-use diesel::prelude::*;
 use diesel::pg::PgConnection;
-use chrono::prelude::*;
 use util::*;
 use models::prelude::*;
-
-#[derive(Identifiable, Insertable, Debug, Clone, AsChangeset, Queryable, Serialize)]
-#[table_name = "transaction"]
-pub struct Transaction {
-    pub id: i32,
-    pub description: String,
-    pub transaction_date: Option<NaiveDate>,
-    pub amount: i32, // TODO this should be a special Cents money type
-    pub period_id: i32,
-    pub category_id: i32,
-}
+use super::Transaction;
 
 #[derive(FromForm, Serialize, Debug)]
 pub struct TransactionForm {
@@ -29,33 +13,11 @@ pub struct TransactionForm {
     pub category_id: i32,
 }
 
-impl Transaction {
-    pub fn new() -> Transaction {
-        Transaction {
-            id: 0,
-            description: String::new(),
-            transaction_date: Some(Utc::now().naive_utc().date()),
-            amount: 0,
-            period_id: 0,
-            category_id: 0,
-        }
-    }
-
-    pub fn get_by_period(period_id: i32, conn: &PgConnection) -> AppResult<Vec<Transaction>> {
-        transaction::table
-            .filter(transaction::period_id.eq(period_id))
-            .load::<Transaction>(conn)
-            .map_err(|e| app_error!(DatabaseError, e))
-    }
-}
-
-impl_crud!(Transaction, transaction);
-
 impl TransactionForm {
     pub fn is_new(&self) -> bool {
         self.id == 0
     }
-    
+
     pub fn save(&self, conn: &PgConnection) -> AppResult<Transaction> {
         use std::str::FromStr;
         match self.is_valid() {
@@ -64,7 +26,7 @@ impl TransactionForm {
                     id: self.id,
                     description: self.description.clone(),
                     transaction_date: date_from_str(&self.transaction_date).ok(),
-                    amount: (f32::from_str(&self.amount).unwrap() * 100.0) as i32,
+                    amount: (f32::from_str(&self.amount).unwrap() * 100.0) as Cents,
                     period_id: self.period_id,
                     category_id: self.category_id,
                 };

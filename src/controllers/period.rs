@@ -11,7 +11,7 @@ use models::prelude::*;
 
 /// Returns all the routes defined on this controller
 pub fn all_routes() -> Vec<rocket::Route> {
-    routes![index, edit_get, edit_post]
+    routes![index, view_period, edit_get, edit_post]
 }
 
 /// Renders the edit view for a given period
@@ -34,6 +34,14 @@ where
     view("period/edit", &context)
 }
 
+#[derive(Serialize)]
+struct ViewTemplateContext {
+    pub model: models::period::Period,
+    pub transactions: Vec<models::transaction::Transaction>,
+    pub title: Cow<'static, str>,
+    pub flash: Option<String>,
+}
+
 /// Lists all the periods
 #[get("/")]
 pub fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> response::Response {
@@ -52,6 +60,39 @@ pub fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> response::Re
                 extra_data: (),
             };
             view("period/index", &context)
+        }
+        Err(e) => error(e),
+    }
+}
+
+/// View one period
+#[get("/<id>")]
+pub fn view_period(
+    id: i32,
+    message: Option<FlashMessage>,
+    conn: db::PgSqlConn,
+) -> response::Response {
+    let flash = if let Some(message) = message {
+        Some(message.msg().to_string())
+    } else {
+        None
+    };
+    let period = models::period::Period::get(id, &conn).and_then(|period| {
+        match period.get_transactions(&conn) {
+            Ok(transactions) => Ok((period, transactions)),
+            Err(err) => Err(err),
+        }
+    });
+    match period {
+        Ok((period, transactions)) => {
+            let title = period.name.to_string();
+            let context = ViewTemplateContext {
+                model: period,
+                transactions: transactions,
+                flash: flash,
+                title: title.into(),
+            };
+            view("period/view", &context)
         }
         Err(e) => error(e),
     }
@@ -87,7 +128,7 @@ pub fn edit_post(
     match is_valid {
         ValidateResult::Invalid(_) => edit_view(period_form, Some(String::from(is_valid))),
         ValidateResult::Valid => match period_form.save(&conn) {
-            Ok(_) => saved("/periods"),
+            Ok(period) => saved(format!("/periods/{}", period.id)),
             Err(e) => error(e),
         },
     }

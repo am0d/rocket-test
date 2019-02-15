@@ -81,11 +81,7 @@ pub fn edit(id: i32, conn: db::PgSqlConn, message: Option<FlashMessage>) -> resp
         _ => models::transaction::Transaction::get(id, &conn),
     };
     match transaction {
-        Ok(transaction) => edit_view(
-            transaction,
-            &conn,
-            flash,
-        ),
+        Ok(transaction) => edit_view(transaction, &conn, flash),
         Err(e) => error(e),
     }
 }

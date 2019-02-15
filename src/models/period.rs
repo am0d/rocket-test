@@ -19,6 +19,15 @@ pub struct Period {
     pub previous_period_id: Option<i32>,
 }
 
+#[derive(Insertable, Debug)]
+#[table_name = "period"]
+pub struct NewPeriod {
+    pub name: String,
+    pub start_date: NaiveDate,
+    pub end_date: Option<NaiveDate>,
+    pub previous_period_id: Option<i32>,
+}
+
 #[derive(FromForm, Serialize, Debug)]
 pub struct PeriodForm {
     pub id: i32,
@@ -50,7 +59,30 @@ impl Period {
     }
 }
 
-impl_crud!(Period, period);
+impl_crud!(Period, NewPeriod, period);
+
+impl NewPeriod {
+    fn insert(&self, conn: &PgConnection) -> AppResult<Period>
+    where
+        Self: Sized,
+    {
+        diesel::insert_into(period::table)
+            .values(self)
+            .get_result(conn)
+            .map_err(|e| app_error!(DatabaseError, e))
+    }
+}
+
+impl<'a> From<&'a Period> for NewPeriod {
+    fn from(period: &'a Period) -> NewPeriod {
+        NewPeriod {
+            name: period.name.clone(),
+            start_date: period.start_date,
+            end_date: period.end_date,
+            previous_period_id: period.previous_period_id
+        }
+    }
+}
 
 impl Default for Period {
     fn default() -> Self {
