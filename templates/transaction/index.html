@@ -1,0 +1,15 @@
+{% extends "../layout.html" %}
+<a href="/transactions/0/edit">New Transaction</a>
+<h4>Transactions:</h4>
+{% match flash %}{% when Some with (flash) %}
+<div class="text-danger">{{ flash }}</div>
+{% when None %}{% endmatch %}
+<ul>
+  {% for transaction in transactions %}
+  <li>
+    <a href="/transactions/{{ transaction.id }}/edit">{{
+      transaction.description
+    }}</a>
+  </li>
+  {% endfor %}
+</ul>

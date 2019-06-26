@@ -15,7 +15,7 @@ pub fn all_routes() -> Vec<rocket::Route> {
 }
 
 /// Returns the edit view for a given category
-fn edit_view<M>(category_form: M, flash: Option<String>) -> response::Response
+fn edit_view<M>(category_form: M, flash: Option<String>) -> response::Response<()>
 where
     M: Into<models::category::CategoryForm>,
 {
@@ -36,7 +36,7 @@ where
 
 /// Lists all the categories
 #[get("/")]
-pub fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> response::Response {
+pub fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> response::Response<()> {
     let flash = if let Some(message) = message {
         Some(message.msg().to_string())
     } else {
@@ -58,7 +58,11 @@ pub fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> response::Re
 }
 
 #[get("/<id>/edit")]
-pub fn edit_get(id: i32, conn: db::PgSqlConn, message: Option<FlashMessage>) -> response::Response {
+pub fn edit_get(
+    id: i32,
+    conn: db::PgSqlConn,
+    message: Option<FlashMessage>,
+) -> response::Response<()> {
     let flash = if let Some(message) = message {
         Some(message.msg().to_string())
     } else {
@@ -79,7 +83,7 @@ pub fn edit_post(
     _id: u32,
     category_form: Form<models::category::CategoryForm>,
     conn: db::PgSqlConn,
-) -> response::Response {
+) -> response::Response<()> {
     let category_form = category_form.into_inner();
     let is_valid = category_form.is_valid();
     match is_valid {

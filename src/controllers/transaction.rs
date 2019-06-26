@@ -8,6 +8,7 @@ use super::context::{IndexTemplateContext, TemplateContext};
 use util::*;
 use util::response::*;
 use models::prelude::*;
+use views::transaction::TransactionIndex;
 
 /// Returns all the routes defined on this controller
 pub fn all_routes() -> Vec<rocket::Route> {
@@ -19,7 +20,7 @@ fn edit_view<T>(
     transaction_form: T,
     conn: &db::PgSqlConn,
     flash: Option<String>,
-) -> response::Response
+) -> response::Response<()>
 where
     T: Into<models::transaction::TransactionForm>,
 {
@@ -47,7 +48,10 @@ where
 
 /// Lists all the transactions
 #[get("/")]
-pub fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> response::Response {
+pub fn index(
+    message: Option<FlashMessage>,
+    conn: db::PgSqlConn,
+) -> response::Response<TransactionIndex> {
     let flash = if let Some(message) = message {
         Some(message.msg().to_string())
     } else {
@@ -56,13 +60,12 @@ pub fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> response::Re
     let transactions = models::transaction::Transaction::list(&conn);
     match transactions {
         Ok(transactions) => {
-            let context = IndexTemplateContext {
-                model: transactions,
+            let context = TransactionIndex {
+                transactions: transactions,
                 flash: flash,
                 title: "Transactions".into(),
-                extra_data: (),
             };
-            view("transaction/index", &context)
+            template(context)
         }
         Err(e) => error(e),
     }
@@ -70,7 +73,7 @@ pub fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> response::Re
 
 /// Returns the edit page for the given transaction (including new transactions)
 #[get("/<id>/edit")]
-pub fn edit(id: i32, conn: db::PgSqlConn, message: Option<FlashMessage>) -> response::Response {
+pub fn edit(id: i32, conn: db::PgSqlConn, message: Option<FlashMessage>) -> response::Response<()> {
     let flash = if let Some(message) = message {
         Some(message.msg().to_string())
     } else {
@@ -92,7 +95,7 @@ pub fn save(
     _id: u32,
     transaction_form: Form<models::transaction::TransactionForm>,
     conn: db::PgSqlConn,
-) -> response::Response {
+) -> response::Response<()> {
     let transaction_form = transaction_form.into_inner();
     let is_valid = transaction_form.is_valid();
     match is_valid {

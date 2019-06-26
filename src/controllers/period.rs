@@ -15,7 +15,7 @@ pub fn all_routes() -> Vec<rocket::Route> {
 }
 
 /// Renders the edit view for a given period
-fn edit_view<T>(period_form: T, flash: Option<String>) -> response::Response
+fn edit_view<T>(period_form: T, flash: Option<String>) -> response::Response<()>
 where
     T: Into<models::period::PeriodForm>,
 {
@@ -44,7 +44,7 @@ struct ViewTemplateContext {
 
 /// Lists all the periods
 #[get("/")]
-pub fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> response::Response {
+pub fn index(message: Option<FlashMessage>, conn: db::PgSqlConn) -> response::Response<()> {
     let flash = if let Some(message) = message {
         Some(message.msg().to_string())
     } else {
@@ -71,7 +71,7 @@ pub fn view_period(
     id: i32,
     message: Option<FlashMessage>,
     conn: db::PgSqlConn,
-) -> response::Response {
+) -> response::Response<()> {
     let flash = if let Some(message) = message {
         Some(message.msg().to_string())
     } else {
@@ -100,7 +100,11 @@ pub fn view_period(
 
 /// Returns the edit page for the given period (including new periods)
 #[get("/<id>/edit")]
-pub fn edit_get(id: i32, conn: db::PgSqlConn, message: Option<FlashMessage>) -> response::Response {
+pub fn edit_get(
+    id: i32,
+    conn: db::PgSqlConn,
+    message: Option<FlashMessage>,
+) -> response::Response<()> {
     let flash = if let Some(message) = message {
         Some(message.msg().to_string())
     } else {
@@ -122,7 +126,7 @@ pub fn edit_post(
     _id: u32,
     period_form: Form<models::period::PeriodForm>,
     conn: db::PgSqlConn,
-) -> response::Response {
+) -> response::Response<()> {
     let period_form = period_form.into_inner();
     let is_valid = period_form.is_valid();
     match is_valid {

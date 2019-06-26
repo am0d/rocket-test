@@ -8,6 +8,7 @@ pub mod schema;
 pub mod db;
 pub mod models;
 pub mod controllers;
+pub mod views;
 
 extern crate chrono;
 #[macro_use]
@@ -15,6 +16,7 @@ extern crate diesel;
 extern crate dotenv;
 extern crate failure;
 //#[macro_use]
+extern crate askama;
 extern crate failure_derive;
 extern crate markdown;
 #[macro_use]
